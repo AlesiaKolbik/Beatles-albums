@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX test</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+    <style>
+        .SAlbums td { padding: 10px 20px 10px 0; vertical-align: top }
+
+        .SName { color: blue; width: 180px; padding-left: 20px; text-indent: -20px }
+        .SName span { font-weight: bold }
+
+        .SYear { color: green }
+        .SYear span { font-weight: bold }
+
+        .SPlace { color: red }
+        .SPlace span { font-weight: bold }
+    </style>
+
+</head>
+<body>
+<table class='SAlbums'>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+<script>
+    let jsonData;
+
+    const promise = new Promise((resolve, reject) => {
+        const oReq = new XMLHttpRequest();
+        oReq.onload = function(r) {
+            if (oReq.status === 200) { // 200 OK
+                resolve(oReq.responseText);
+            }
+            else { // не 200 - значит вывести текст ошибки
+                reject(oReq);
+            }
+        };
+        oReq.open("get", "albums.json", true);
+        oReq.send();
+    });
+    promise.then(json => {
+        jsonData = JSON.parse(json);
+        return new Promise((resolve, reject) => {
+            const oReq = new XMLHttpRequest();
+            oReq.onload = function (r) {
+                if (oReq.status === 200) { // 200 OK
+                    resolve(oReq.responseText);
+                }
+                else { // не 200 - значит вывести текст ошибки
+                    reject(oReq);
+                }
+            };
+            oReq.open("get", "templates.js", true);
+            oReq.send();
+        });
+    }).then(templates =>{
+        let scriptTmpl = document.createElement('script');
+        scriptTmpl.type = 'text/x-jquery-tmpl';
+        scriptTmpl.id = 'albumsTmpl';
+        scriptTmpl.innerHTML = templates;
+        document.head.appendChild(scriptTmpl);
+        for(let i=0;i<jsonData.length;i++){
+            $('#albumsTmpl').tmpl(jsonData[i]).appendTo($('td').get(i))
+        }
+    });
+
+</script>
+</body>
+</html>
